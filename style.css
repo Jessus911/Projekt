@@ -38,17 +38,17 @@ body > div {
 
 .pacman {
 
-  background-image: url('../img/mizpacman.png');
+  background-image: url('./img/mizpacman.png');
 }
 
 .left {
-  background-image: url('../img/mizpacman-left.png');
+  background-image: url('./img/mizpacman-left.png');
 }
 
 .up {
-  background-image: url('../img/mizpacman-up.png');
+  background-image: url('./img/mizpacman-up.png');
 }
 
 .down {
-  background-image: url('../img/mizpacman-down.png');
+  background-image: url('./img/mizpacman-down.png');
 }
