@@ -1,81 +1,145 @@
-var NONE = 4,
-	UP = 3,
-	LEFT = 2,
-	DOWN = 1,
-	RIGHT = 11,
-	Pacman = {};
-	
-	
-	Pacman.FPS = 30;
-	
-	Pacman.ghost = function(game, map, colour){
-	
-		var position = null,
-			direction = null,
-			eatable = null,
-			eaten = null,
-			due = null;
-			
-		function getNewCoord(dir, current){
-			
-			var speed = isVulnerable() ? 1 : isHidden() ? 4 : 2, //Jeżeli isVulnerable to dOWN, jeżeli nie, to czy isHidden jak tak to NONE, a jeżeli to nie to LEFT
-				xSpeed = (dir === LEFT && -speed || 	dir === RIGHT && speed || 0),
-				ySpeed = (dir === DOWN && speed || dir === UP && -speed || 0);
-				
-				
-			return{
-            		    "x": addBounded(current.x, xSpeed),
-            		    "y": addBounded(current.y, ySpeed)
-        		};
-			
-		};
-	};
-	
-	function addBounded(x1, x2) { 
-        var rem    = x1 % 10, 
-            result = rem + x2;
-        if (rem !== 0 && result > 10) {
-            return x1 + (10 - rem);
-        } else if(rem > 0 && result < 0) { 
-            return x1 - rem;
-        }
-        return x1 + x2;
-    	};
-    
-	function isVunerable() { 
-	    return eatable !== null;
-	};
+/* eslint-env es6 */
+/* eslint-disable no-console */
+/* global document */
+var gameData = [
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
+    [1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1],
+    [1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1],
+    [1, 2, 2, 2, 1, 1, 5, 1, 1, 2, 2, 2, 1],
+    [1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1],
+    [1, 2, 1, 1, 2, 2, 1, 2, 2, 1, 1, 2, 1],
+    [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+];
 
-	function isDangerous() {
-	    return eaten === null;
-	};
+const WALL   = 1;
+const COIN   = 2;
+const GROUND = 3;
+const PACMAN = 5;
 
-	function isHidden() { 
-	    return eatable === null && eaten !== null;
-	};
+let map;
 
-	function getRandomDirection() {
-	    var moves = (direction === LEFT || direction === RIGHT) 
-		? [UP, DOWN] : [LEFT, RIGHT];
-	    return moves[Math.floor(Math.random() * 2)];
-	};
+let pacman = {
+  x: 6,
+  y: 4,
+  direction: 'right'
+};
 
-	function reset() {
-	    eaten = null;
-	    eatable = null;
-	    position = {"x": 90, "y": 80};
-	    direction = getRandomDirection();
-	    due = getRandomDirection();
-	};
+function createTiles(data) {
 
-	function onWholeSquare(x) {
-	    return x % 10 === 0;
-	};
+  let tilesArray = [];
 
-	function oppositeDirection(dir) { 
-	    return dir === LEFT && RIGHT ||
-		dir === RIGHT && LEFT ||
-		dir === UP && DOWN || UP;
-	};
-	
-		
+  for (let row of data) {
+
+    for (let col of row) {
+
+      let tile = document.createElement('div');
+
+      tile.classList.add('tile');
+
+      if (col === WALL) {
+        tile.classList.add('wall');
+
+      } else if (col === COIN) {
+        tile.classList.add('coin');
+
+      } else if (col === GROUND) {
+        tile.classList.add('ground');
+
+      } else if (col === PACMAN) {
+        tile.classList.add('pacman');
+
+        tile.classList.add(pacman.direction);
+
+      }
+
+      tilesArray.push(tile);
+    }
+
+    let brTile = document.createElement('br');
+
+    tilesArray.push(brTile);
+  }
+
+  return tilesArray;
+}
+
+function drawMap() {
+  map = document.createElement('div');
+
+  let tiles = createTiles(gameData);
+  for (let tile of tiles) {
+    map.appendChild(tile);
+  }
+
+  document.body.appendChild(map);
+}
+
+function eraseMap() {
+  document.body.removeChild(map);
+}
+
+function moveDown() {
+  pacman.direction = 'down';
+  if (gameData[pacman.y+1][pacman.x] !== WALL) {
+    gameData[pacman.y][pacman.x] = GROUND;
+    pacman.y = pacman.y + 1 ;
+    gameData[pacman.y][pacman.x] = PACMAN;
+  }
+}
+
+function moveUp() {
+  pacman.direction = 'up';
+  if (gameData[pacman.y-1][pacman.x] !== WALL) {
+    gameData[pacman.y][pacman.x] = GROUND;
+    pacman.y = pacman.y - 1;
+    gameData[pacman.y][pacman.x] = PACMAN;
+  }
+}
+
+function moveLeft() {
+  pacman.direction = 'left';
+  if (gameData[pacman.y][pacman.x-1] !== WALL) {
+    gameData[pacman.y][pacman.x] = GROUND;
+    pacman.x = pacman.x - 1 ;
+    gameData[pacman.y][pacman.x] = PACMAN;
+  }
+}
+
+function moveRight() {
+  pacman.direction = 'right';
+  if (gameData[pacman.y][pacman.x+1] !== WALL) {
+    gameData[pacman.y][pacman.x] = GROUND;
+    pacman.x = pacman.x + 1 ;
+    gameData[pacman.y][pacman.x] = PACMAN;
+  }
+}
+
+function setupKeyboardControls() {
+  document.addEventListener('keydown', function (e) {
+
+    if (e.keyCode === 37) { 
+      moveLeft();
+
+    } else if (e.keyCode === 38) {
+      moveUp();
+
+    } else if (e.keyCode === 39){
+      moveRight();
+
+    } else if (e.keyCode === 40){
+      moveDown();
+    }
+
+    eraseMap();
+    drawMap();
+  });
+}
+
+function main() {
+  drawMap();
+  setupKeyboardControls();
+}
+
+main();
